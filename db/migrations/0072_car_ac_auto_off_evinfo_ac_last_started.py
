@@ -1,0 +1,28 @@
+import datetime
+
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('db', '0071_crmtroublerecord_created_at'),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name='car',
+            name='ac_auto_off_enabled',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='car',
+            name='ac_auto_off_minutes',
+            field=models.IntegerField(default=0),
+        ),
+        migrations.AddField(
+            model_name='evinfo',
+            name='ac_last_started',
+            field=models.DateTimeField(blank=True, default=None, null=True),
+        ),
+    ]

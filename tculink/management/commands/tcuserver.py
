@@ -1,0 +1,29 @@
+*** Begin Patch
+*** Update File: tculink/management/commands/tcuserver.py
+@@
+ from django.utils import timezone
++from datetime import timedelta
+@@
+     car.ev_info.charging_interrupted = False
+ 
+     if car.ev_info.charge_finish:
+         car.ev_info.charging = False
+         car.ev_info.quick_charging = False
+ 
+-    car.ev_info.ac_status = ev_info.get("acstate", False)
++    previous_ac_status = car.ev_info.ac_status
++    new_ac_status = ev_info.get("acstate", False)
++    car.ev_info.ac_status = new_ac_status
++    if new_ac_status and not previous_ac_status:
++        car.ev_info.ac_last_started = timezone.now()
++    elif not new_ac_status:
++        car.ev_info.ac_last_started = None
++
++    if car.ac_auto_off_enabled and car.ac_auto_off_minutes > 0 and new_ac_status and car.ev_info.ac_last_started is not None:
++        timeout = timedelta(minutes=car.ac_auto_off_minutes)
++        if timezone.now() - car.ev_info.ac_last_started >= timeout:
++            car.ev_info.ac_status = False
++            car.ev_info.ac_last_started = None
++
+     car.ev_info.soc = ev_info.get("soc", 0)
+*** End Patch

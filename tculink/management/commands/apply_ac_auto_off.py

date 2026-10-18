@@ -1,0 +1,22 @@
+from datetime import timedelta
+
+from django.core.management.base import BaseCommand
+from django.utils import timezone
+
+from db.models import Car
+
+
+class Command(BaseCommand):
+    help = 'Apply AC auto-off timeout to cars.'
+
+    def handle(self, *args, **options):
+        now = timezone.now()
+        for car in Car.objects.select_related('ev_info').filter(ac_auto_off_enabled=True, ac_auto_off_minutes__gt=0):
+            ev = car.ev_info
+            if ev.ac_last_started is None:
+                continue
+            timeout = timedelta(minutes=car.ac_auto_off_minutes)
+            if ev.ac_status and now - ev.ac_last_started >= timeout:
+                ev.ac_status = False
+                ev.ac_last_started = None
+                ev.save(update_fields=['ac_status', 'ac_last_started'])

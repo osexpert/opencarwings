@@ -1,0 +1,23 @@
+from datetime import timedelta
+
+from django.utils import timezone
+
+
+def apply_ac_auto_off(car):
+    if not getattr(car, 'ac_auto_off_enabled', False):
+        return False
+    if getattr(car, 'ac_auto_off_minutes', 0) <= 0:
+        return False
+    ev_info = car.ev_info
+    if ev_info.ac_last_started is None:
+        return False
+    if not ev_info.ac_status:
+        ev_info.ac_last_started = None
+        ev_info.save(update_fields=['ac_last_started'])
+        return False
+    if timezone.now() - ev_info.ac_last_started >= timedelta(minutes=car.ac_auto_off_minutes):
+        ev_info.ac_status = False
+        ev_info.ac_last_started = None
+        ev_info.save(update_fields=['ac_status', 'ac_last_started'])
+        return True
+    return False
