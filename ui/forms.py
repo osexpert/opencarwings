@@ -20,6 +20,13 @@ class SettingsForm(forms.Form):
     disable_auth = forms.BooleanField(label=_("Disable TCU authentication"), required=False)
     force_soc_display = forms.BooleanField(label=_("Show calculated battery percentage"), required=False)
     hmac_key = forms.RegexField(label=_("HMAC Key"), max_length=32, required=False, regex=r"^([0-9a-fA-F])+")
+    ac_auto_off_enabled = forms.BooleanField(label=_("Auto turn A/C off"), required=False)
+    ac_auto_off_minutes = forms.ChoiceField(
+        label=_("Auto turn A/C off after"),
+        choices=[(0, _("Never")), (15, _("15 minutes")), (30, _("30 minutes")), (60, _("1 hour")), (120, _("2 hours"))],
+        required=False,
+        initial=0,
+    )
 
 class Step0Form(forms.Form):
     id = forms.IntegerField(label="ID")
